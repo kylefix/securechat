@@ -42,6 +42,8 @@ const User = getModel('User', {
 const db = getDb()
 
 app.post('/api/send', async (req, res, next) => {
+  console.log(req.body.toString())
+  console.log(req.query)
   try {
     const {token, room} = req.query
     const message = req.body.toString()
@@ -60,13 +62,14 @@ app.post('/api/send', async (req, res, next) => {
       username,
       content: message
     }
-    const {_id} = await (new Message(newMessage).save())
+    const {_id} = await new Message(newMessage).save()
 
     const chatRoom = await ChatRoom.findOne({id: room})
     if (!chatRoom) return res.sendStatus(400)
 
-    await chatRoom.messages.push(_id)
-    chatRoom.save()
+    chatRoom.messages.push(_id)
+    await chatRoom.save()
+    return res.sendStatus(200)
   } catch (e) {
     next(e)
   }
@@ -106,7 +109,7 @@ app.get('/api/poll', async (req, res, next) => {
     const chatHistory = await Promise.all(messages.map(async (id) =>
       Message.findOne(id)
     ))
-    const messageList = chatHistory.slice(0, 10).map(({content, username}) => (
+    const messageList = chatHistory.slice(-10).map(({content, username}) => (
       {content, username}
     ))
 
