@@ -2,12 +2,13 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
+const env = require('./.env.js')
 
 const app = express()
 app.use(bodyParser.raw({type: '*/*'}))
 
 const getDb = () => {
-  const mongodb = 'mongodb://127.0.0.1:27018/securechat'
+  const mongodb = env.DB
   mongoose.connect(mongodb, { useNewUrlParser: true })
   mongoose.Promise = global.Promise
   return mongoose.connection
@@ -109,7 +110,10 @@ app.get('/api/poll', async (req, res, next) => {
       {content, username}
     ))
 
-    res.send(JSON.stringify(messageList))
+    res.send(JSON.stringify(messageList.length > 10
+      ? messageList.slice(10)
+      : messageList
+    ))
   } catch (e) {
     next(e)
   }

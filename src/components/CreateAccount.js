@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+
 import Input from './Input'
 import Form from './Form'
 import Submit from './Submit'
@@ -53,17 +54,20 @@ class CreateAccount extends Component {
     if (this.state.loading) return this.renderLoading()
 
     return (
-      <Form onSubmit={this.handleCreateAccount} >
-        <Input
-          value={this.state.usernameInput}
-          onChange={this.handleChangeUsername}
-        />
-        <Input
-          value={this.state.passwordInput}
-          onChange={this.handleChangePassword}
-        />
-        <Submit />
-      </Form>
+      <div>
+        <Link to='/createAccount'>Create Account</Link>
+        <Form onSubmit={this.handleCreateAccount} >
+          <Input
+            value={this.state.usernameInput}
+            onChange={this.handleChangeUsername}
+          />
+          <Input
+            value={this.state.passwordInput}
+            onChange={this.handleChangePassword}
+          />
+          <Submit />
+        </Form>
+      </div>
     )
   }
 }
