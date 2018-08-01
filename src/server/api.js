@@ -106,14 +106,11 @@ app.get('/api/poll', async (req, res, next) => {
     const chatHistory = await Promise.all(messages.map(async (id) =>
       Message.findOne(id)
     ))
-    const messageList = chatHistory.map(({content, username}) => (
+    const messageList = chatHistory.slice(0, 10).map(({content, username}) => (
       {content, username}
     ))
 
-    res.send(JSON.stringify(messageList.length > 10
-      ? messageList.slice(10)
-      : messageList
-    ))
+    res.send(JSON.stringify(messageList))
   } catch (e) {
     next(e)
   }
