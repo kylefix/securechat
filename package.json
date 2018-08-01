@@ -14,7 +14,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "cp ./.env.production.js ./.env.js && react-scripts build",
+    "build": "cp ./server/.env.production.js ./server/.env.js && react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
