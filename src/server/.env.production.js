@@ -1,4 +1,4 @@
-const DB = 'mongodb://127.0.0.1:27019/securechat'
+const DB = 'mongodb://127.0.0.1:27017/securechat'
 
 module.exports = {
   DB
