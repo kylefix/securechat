@@ -49,7 +49,7 @@ const Token = getModel('Token', {
 const User = getModel('User', {
   username: String,
   password: String,
-  permissions: Array,
+  permissions: Array
 })
 
 const db = getDb()
@@ -138,13 +138,15 @@ app.post('/api/send', async (req, res, next) => {
       roomId: chatRoom._id
     })
 
-    if (!chatRoomUser) res.sendStatus(401)
+    if (!chatRoomUser) return res.sendStatus(401)
     chatRoomUser.lastMessage = (Date.now()).toString()
     await chatRoomUser.save()
 
     chatRoom.messages.push(_id)
     await chatRoom.save()
-
+    if (chatRoom.name === 'bot') {
+      getBotResponse(message, chatRoom.id)
+    }
     return res.sendStatus(200)
   } catch (e) {
     next(e)
@@ -371,3 +373,31 @@ const cleanUp = async () => {
 setInterval(cleanUp, 200)
 
 app.listen(4000)
+
+const Cleverbot = require('better-cleverbot-io')
+
+const bot = new Cleverbot({
+  user: 'CvXdZYxq0oeCUzNA',
+  key: 'mNZUpf5SfhPTnBgSOkEPW6lju5hKMr7s',
+  nick: 'Yep'
+})
+
+bot.create()
+
+const getBotResponse = async (message, room) => {
+  const response = await bot.ask(message)
+
+  const newMessage = {
+    username: 'bot',
+    content: response
+  }
+
+  const {_id} = await new Message(newMessage).save()
+
+  const chatRoom = await ChatRoom.findOne({id: room})
+
+  console.log(response)
+
+  chatRoom.messages.push(_id)
+  await chatRoom.save()
+}
