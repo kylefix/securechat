@@ -1,84 +1,95 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import styled from 'styled-components'
+
 import ChatRoom from './ChatRoom'
-import { Link } from 'react-router-dom'
+
+const Loading = styled.div`
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+`
 
 export default class ChatContainer extends Component {
   state = {
-    messages: {
-      '0': []
-    },
-    token: null,
+    messages: [],
     intervalId: null,
-    chatroomID: '0'
+    loading: true
+  }
+
+  static propTypes = {
+    chatRoomId: PropTypes.string.isRequired
   }
 
   static contextTypes = {
     router: PropTypes.object
   }
 
-  componentDidMount () {
-    const token = window.localStorage.getItem('token')
-    if (token) {
-      const id = setInterval(
-        () => this.pollMessages(this.state.chatroomID)
-        , 1000)
-      console.log(`Setting token: ${token}`)
-      return this.setState({intervalId: id, token})
-    }
+  async componentDidMount () {
+    const {chatRoomId} = this.props
+    const id = setInterval(
+      () => this.pollMessages(chatRoomId)
+      , 200)
 
-    this.context.router.history.push('/login')
+    return this.setState({intervalId: id})
   }
 
   componentWillUnmount () {
     clearInterval(this.state.intervalId)
   }
 
-  pollMessages = async chatroomID => {
-    const {token} = this.state
-    if (!token) return
-
+  pollMessages = async chatRoomId => {
     try {
-      const messages = JSON.parse(await (
-        await window.fetch(
-          `/api/poll?token=${token}&&room=${chatroomID}`
-        )
-      ).text())
+      const response = await window.fetch(
+        `/api/poll?room=${chatRoomId}`,
+        {
+          method: 'GET',
+          credentials: 'same-origin'
+        }
+      )
+
+      if (response.status !== 200) return this.props.onKick()
+
+      const messages = JSON.parse(await response.text())
 
       this.setState({
-        messages: {
-          ...this.state.messages,
-          [chatroomID]: messages
-        }
+        messages,
+        loading: false
       })
     } catch (e) {
-      console.log(`Error fetching messages!: ${e}`)
-      this.context.router.history.push('/login')
+      // this.context.router.history.push('/login')
     }
   }
 
-  sendMessage = (message, chatroomID) => {
-    const {messages, token} = this.state
-
+  sendMessage = (message, chatRoomId) => {
     window.fetch(
-      `/api/send?token=${token}&&room=${chatroomID}`,
+      `/api/send?room=${chatRoomId}`,
       { method: 'POST',
-        body: message }
+        body: message,
+        credentials: 'same-origin'}
     ).catch(e => console.log(`Error sending message!: ${e}`))
+  }
 
-    this.setState({
-      ...messages,
-      [chatroomID]: messages[chatroomID].concat(message)
-    })
+  renderLoading () {
+    window.componentHandler.upgradeAllRegistered()
+
+    return (
+      <Loading>
+        <div className='mdl-spinner mdl-js-spinner is-active' />
+      </Loading>
+    )
   }
 
   render () {
+    if (this.state.loading) return this.renderLoading()
+
     return (
       <div>
-        <Link to='/createAccount'>Create Account</Link>
         <ChatRoom
-          chatroomID='0'
-          messages={this.state.messages['0'] || []}
+          chatRoomId={this.props.chatRoomId}
+          messages={this.state.messages || []}
           onSendMessage={this.sendMessage}
         />
       </div>

@@ -6,6 +6,14 @@ import Input from './Input'
 import Form from './Form'
 import Submit from './Submit'
 
+const Loading = styled.div`
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+`
+
 const StyledForm = styled.div`
   & form {
     margin: 2em;
@@ -15,9 +23,9 @@ const StyledForm = styled.div`
   }
 `
 
-class CreateAccount extends Component {
+class CreateRoom extends Component {
   state = {
-    usernameInput: '',
+    nameInput: '',
     passwordInput: '',
     loading: false
   }
@@ -28,14 +36,14 @@ class CreateAccount extends Component {
 
   handleCreateAccount = async () => {
     const body = {
-      username: this.state.usernameInput,
+      name: this.state.nameInput,
       password: this.state.passwordInput
     }
 
     this.setState({loading: true})
 
     const response = await (
-      await window.fetch('/api/create', {
+      await window.fetch('/api/createRoom', {
         method: 'POST',
         body: JSON.stringify(body),
         credentials: 'same-origin'
@@ -48,8 +56,8 @@ class CreateAccount extends Component {
     }
   }
 
-  handleChangeUsername = e => this.setState({
-    usernameInput: e.target.value
+  handleChangeName = e => this.setState({
+    nameInput: e.target.value
   })
 
   handleChangePassword = e => this.setState({
@@ -57,7 +65,13 @@ class CreateAccount extends Component {
   })
 
   renderLoading () {
-    return <div>Submitting...</div>
+    window.componentHandler.upgradeAllRegistered()
+
+    return (
+      <Loading>
+        <div className='mdl-spinner mdl-js-spinner is-active' />
+      </Loading>
+    )
   }
 
   render () {
@@ -67,12 +81,12 @@ class CreateAccount extends Component {
       <StyledForm>
         <Form onSubmit={this.handleCreateAccount} >
           <Input
-            label='Enter a username'
-            value={this.state.usernameInput}
-            onChange={this.handleChangeUsername}
+            label='Enter a room name'
+            value={this.state.nameInput}
+            onChange={this.handleChangeName}
           />
           <Input
-            label='Enter a password'
+            label='Enter a password or none if public'
             value={this.state.passwordInput}
             onChange={this.handleChangePassword}
           />
@@ -83,4 +97,4 @@ class CreateAccount extends Component {
   }
 }
 
-export default CreateAccount
+export default CreateRoom

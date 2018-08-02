@@ -1,10 +1,20 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
 import Input from './Input'
 import Form from './Form'
 import Submit from './Submit'
+
+const StyledForm = styled.div`
+  margin: 2em;
+  & form {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+  }
+`
 
 class Login extends Component {
   state = {
@@ -27,8 +37,10 @@ class Login extends Component {
     try {
       const response = await window.fetch('/api/login', {
         method: 'POST',
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
+        credentials: 'same-origin'
       })
+      console.log(response)
 
       if (response.status === 401) {
         window.alert('Invalid Username/Password')
@@ -36,7 +48,6 @@ class Login extends Component {
       }
 
       this.setState({loading: false})
-      window.localStorage.setItem('token', await response.text())
       this.context.router.history.push('/')
     } catch (e) {
       this.setState({loading: false})
@@ -60,17 +71,20 @@ class Login extends Component {
     if (this.state.loading) return this.renderLoading()
 
     return (
-      <Form onSubmit={this.handleLogin} >
-        <Input
-          value={this.state.usernameInput}
-          onChange={this.handleChangeUsername}
-        />
-        <Input
-          value={this.state.passwordInput}
-          onChange={this.handleChangePassword}
-        />
-        <Submit />
-      </Form>
+      <StyledForm>
+        <h4>Login</h4>
+        <Form onSubmit={this.handleLogin} >
+          <Input
+            value={this.state.usernameInput}
+            onChange={this.handleChangeUsername}
+          />
+          <Input
+            value={this.state.passwordInput}
+            onChange={this.handleChangePassword}
+          />
+          <Submit />
+        </Form>
+      </StyledForm>
     )
   }
 }

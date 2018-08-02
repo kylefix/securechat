@@ -7,6 +7,10 @@ export default class Form extends Component {
     onSubmit: PropTypes.func.isRequired
   }
 
+  componentDidMount () {
+    window.componentHandler.upgradeAllRegistered()
+  }
+
   handleSubmit = e => {
     e.preventDefault()
     this.props.onSubmit()
